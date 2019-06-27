@@ -35,24 +35,29 @@ def main():
 
 def proxy_thread(conn, client_addr):
     request = conn.recv(MAX_DATA_RECY)
-    first_line = request.decode().split('n')[0]
+    first_line = request.decode().split('\n')[0]
+    print("frist_line", first_line)
     url = first_line.split(' ')[1]
 
     if(DEBUG):
-        print("line: ", first_line)
+        print("line: ",request.decode())
         print("url: ", url)
     
     http_pos = url.find('://')
+    print(http_pos)
     if(http_pos == -1):
         temp = url
     else:
+        print("url : ", url)
+        print("http_post+3 : ", http_pos+3)
         temp = url[(http_pos+3):]
-    
+        print("temp : ",temp)     
     port_pos = temp.find(":")
-
+    print(temp)
     webserver_pos = temp.find("/")
     if webserver_pos == -1:
         webserver_pos = len(temp)
+    print(webserver_pos)
         
     webserver = ""
     port = -1
