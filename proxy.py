@@ -2,7 +2,7 @@ import os, sys, _thread, socket
 
 BACKLOG = 50 # how many pending connections queue will hold
 MAX_DATA_RECY = 4096 # byte
-DEBUG = False
+DEBUG = True
 
 
 def main():
@@ -45,7 +45,7 @@ def proxy_thread(conn, client_addr):
     http_pos = url.find('://')
     if(http_pos == -1):
         temp = url
-    else
+    else:
         temp = url[(http_pos+3):]
     
     port_pos = temp.find(":")
