@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import os, sys, _thread, socket
 
 BACKLOG = 50 # how many pending connections queue will hold
 MAX_DATA_RECY = 4096 # byte
-DEBUG = True
+DEBUG = False
 
 
 def main():
@@ -24,10 +26,11 @@ def main():
             s.close()
         print("socket err", e)
         sys.exit(1)
-    
+    print("listening...") 
     while 1:
-        print("...socket listening")
         conn, client_addr = s.accept()
+        if(conn):
+            print("accepted!")
         _thread.start_new_thread(proxy_thread, (conn, client_addr))
 
     s.close()
@@ -69,14 +72,21 @@ def proxy_thread(conn, client_addr):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((webserver, port))
         s.send(request)
-
+        whole_data = b""
         while 1:
             data = s.recv(MAX_DATA_RECY)
-            print("data", data)
             if(len(data) > 0):
-                conn.send(data)
+                whole_data+=data
             else:
                 break
+        if(whole_data.split(b"\r\n")[0] != b"HTTP/1.1 200 OK"):
+            conn.send(whole_data)
+        else:
+            if(whole_data.split(b"\r\n")[3] != b"Content-Type: text/html; charset=utf-8"):
+                conn.send(whole_data)
+            else:
+                print(whole_data.split(b"gzip")[1].split(b"\r\n")[3])
+                conn.send(whole_data)
         s.close()
         conn.close()
     except OSError as e:
