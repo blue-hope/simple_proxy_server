@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os, sys, _thread, socket
+from dechunk import dechunk
 
 BACKLOG = 50 # how many pending connections queue will hold
 MAX_DATA_RECY = 4096 # byte
@@ -85,7 +86,7 @@ def proxy_thread(conn, client_addr):
             if(whole_data.split(b"\r\n")[3] != b"Content-Type: text/html; charset=utf-8"):
                 conn.send(whole_data)
             else:
-                print(whole_data.split(b"gzip")[1].split(b"\r\n")[3])
+                print(dechunk(whole_data.split(b"gzip")[1]))
                 conn.send(whole_data)
         s.close()
         conn.close()
