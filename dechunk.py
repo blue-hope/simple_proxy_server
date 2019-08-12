@@ -18,9 +18,6 @@ def dechunk(data):
             data_size = tmp_data.decode()
             tmp_data = b""
             dechunk_data_arr.append(new_data[j+2:j+int(data_size, 16)+2])
-            print(new_data[j+2:j+int(data_size, 16)+2])
-            print()
-            print()
             skip_loop_start = j+1
             skip_loop_end = j+1 + int(data_size, 16)+2 
             return_data += dechunk_data_arr[cnt]

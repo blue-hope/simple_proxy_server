@@ -2,6 +2,7 @@
 
 import os, sys, _thread, socket
 from dechunk import dechunk
+import gzip, re
 
 BACKLOG = 50 # how many pending connections queue will hold
 MAX_DATA_RECY = 4096 # byte
@@ -86,8 +87,15 @@ def proxy_thread(conn, client_addr):
             if(whole_data.split(b"\r\n")[3] != b"Content-Type: text/html; charset=utf-8"):
                 conn.send(whole_data)
             else:
-                print(dechunk(whole_data.split(b"gzip")[1]))
-                conn.send(whole_data)
+                if(whole_data.find(b'gzip') != -1):
+                    print(whole_data)
+                    decompressed_data = gzip.decompress(dechunk(whole_data.split(b"gzip")[1]))
+                    #print(decompressed_data)
+                    exchanged_data = re.sub(pattern='[<]title[>].+[<][/]title[>]', repl='<title>donghyeon</title>', string=decompressed_data.decode())
+                    compressed_data = whole_data.split(b"gzip")[0] + b'gzip\r\n\r\n' + hex(len(gzip.compress(exchanged_data.encode()))).split('x')[1].encode() + b'\r\n' + gzip.compress(exchanged_data.encode()) + b'\r\n0\r\n\r\n'
+                    conn.send(compressed_data)
+                else:
+                    conn.send(whole_data)
         s.close()
         conn.close()
     except OSError as e:
